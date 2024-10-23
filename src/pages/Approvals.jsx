@@ -108,7 +108,7 @@ export default function Approvals() {
                 const combinedData = [...tripsData.map(trip => ({ ...trip, type: 'trips' })), ...expensesData.map(expense => ({ ...expense, type: 'expenses' }))];
 
                 // Sort the combined data by created time
-                const sortedData = combinedData.sort((a, b)=>{
+                const sortedData = combinedData.sort((a, b) => {
                     return new Date(a.create_at) - new Date(b.create_at);
                 });
                 setData(sortedData);
@@ -128,14 +128,14 @@ export default function Approvals() {
         }
     }, [user]);
 
-    const formatDate = (dateString)=>{
+    const formatDate = (dateString) => {
         const date = new Date(dateString);
         return date.toLocaleString('en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
             hour: '2-digit',
-            minute:'2-digit',
+            minute: '2-digit',
             hour12: true
         })
     }
@@ -147,7 +147,7 @@ export default function Approvals() {
                     <button onClick={handleDeleteSelected} type="button" className="btn btn-danger">Delete Selected</button>
                 )}
 
-                <table className="table">
+                {/* <table className="table">
                     <thead>
                         <tr>
                             {
@@ -211,7 +211,59 @@ export default function Approvals() {
                             </tr>
                         ))}
                     </tbody>
-                </table>
+                </table> */}
+
+                <div className="card-container">
+                    {data.map((item) => (
+                        <div key={item.id} className="card my-2">
+                            <div className="card-body">
+                                {userRole === 'admin' && (
+                                    <div className="form-check mb-2">
+                                        <input
+                                            className="form-check-input"
+                                            type="checkbox"
+                                            checked={selectedItems.has(item.id)}
+                                            onChange={() => handleCheckBoxChange(item.id)}
+                                        />
+                                        <label className="form-check-label">Select</label>
+                                    </div>
+                                )}
+
+                                <h5 className="card-title">{item.subject || item.name}</h5>
+                                <p className="card-text">
+                                    <strong>Category: </strong> {item.category} <br />
+                                    <strong>Amount: </strong> {item.amount} <br />
+                                    <strong>Created At: </strong> {formatDate(item.create_at)} <br />
+                                </p>
+
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <i
+                                        className="bi bi-receipt"
+                                        style={{ cursor: 'pointer' }}
+                                        onClick={() => handleViewImage(item.invoiceurl)}
+                                    ></i>
+
+                                    {userRole === 'admin' ? (
+                                        <select
+                                            className="form-select w-50"
+                                            value={item.status}
+                                            onChange={(e) =>
+                                                handleStatusChange(item.id, e.target.value, item.type)
+                                            }
+                                        >
+                                            <option value="approved">Approved</option>
+                                            <option value="rejected">Rejected</option>
+                                            <option value="pending">Pending</option>
+                                        </select>
+                                    ) : (
+                                        <span className="badge bg-info text-dark">{item.status}</span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
 
                 {showImageModal && (
                     <div className="modal fade show" style={{ display: 'block' }} onClick={() => setShowImageModal(false)}>

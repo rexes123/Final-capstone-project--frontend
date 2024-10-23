@@ -9,22 +9,22 @@ export default function Expense() {
 
     const user = useContext(AuthContext);
 
-      useEffect(()=>{
-          if(user){
-              const getData = async ()=>{
-                  try{
-                      const url = user.user.email === 'admin@gmail.com' ? 'https://backend-2txi.vercel.app/expenses' : `https://backend-2txi.vercel.app/expenses/user/${user.user.uid}`;
-                      const response = await fetch(url);
-                      const data = await response.json();
-                      setData(data);
+    useEffect(() => {
+        if (user) {
+            const getData = async () => {
+                try {
+                    const url = user.user.email === 'admin@gmail.com' ? 'https://backend-2txi.vercel.app/expenses' : `https://backend-2txi.vercel.app/expenses/user/${user.user.uid}`;
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    setData(data);
 
-                  } catch(error){
+                } catch (error) {
                     console.error(error.message);
-                  }
-              };
-              getData();
-          }
-      })
+                }
+            };
+            getData();
+        }
+    })
 
 
 
@@ -82,17 +82,31 @@ export default function Expense() {
         setSelectedExpenses(new Set()); // Clear selected expenses
     };
 
-    const formatDate = (dateString)=>{
+    const formatDate = (dateString) => {
         const date = new Date(dateString);
         return date.toLocaleString('en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
             hour: '2-digit',
-            minute:'2-digit',
+            minute: '2-digit',
             hour12: true
         })
     }
+
+    const getStatusBadgeClass = (status) => {
+        switch (status) {
+            case 'approved':
+                return 'bg-success'; // Green badge for approved status
+            case 'rejected':
+                return 'bg-danger'; // Red badge for rejected status
+            case 'pending':
+                return 'bg-warning text-dark'; // Yellow badge for pending status
+            default:
+                return ''; // Default class if status is unknown
+        }
+    };
+
 
     return (
         <div className="container" style={{ display: "flex" }}>
@@ -104,45 +118,37 @@ export default function Expense() {
                     <button onClick={handleDeleteSelected} type="button" class="btn btn-danger">Delete Selected</button>
                 )}
 
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">
-                                <input
-                                    type="checkbox"
-                                    onChange={handleSelectAll}
-                                    checked={selectedExpenses.size === data.length && data.length > 0}
-                                />
-
-                            </th>
-                            <th scope="col">DETAILS</th>
-                            <th scope="col">MERCHANT</th>
-                            <th scope="col">REPORT</th>
-                            <th scope="col">AMOUNT</th>
-                            <th scope="col">STATUS</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {
-                            data.map((expense) => (
-                                <tr key={expense.id}>
-                                    <th scope="row">
+                <div className="card-container">
+                    {data.map((expense) => (
+                        <div key={expense.id} className="card my-2">
+                            <div className="card-body">
+                                {/* Checkbox for selection */}
+                                {user.user.email === 'admin@gmail.com' && (  // Assuming the admin role check is similar to your example
+                                    <div className="form-check mb-2">
                                         <input
+                                            className="form-check-input"
                                             type="checkbox"
                                             checked={selectedExpenses.has(expense.id)}
                                             onChange={() => handleCheckBoxChange(expense.id)}
                                         />
-                                    </th>
-                                    <td>{expense.subject}</td>
-                                    <td>{expense.merchant}</td>
-                                    <td>{formatDate(expense.date)}</td>
-                                    <td>{expense.amount}</td>
-                                    <td>{expense.status}</td>
-                                </tr>
-                            ))
-                        }
-                    </tbody>
-                </table>
+                                        <label className="form-check-label">Select</label>
+                                    </div>
+                                )}
+
+                                {/* Title and Expense Details */}
+                                <h5 className="card-title">{expense.subject}</h5>
+                                <p className="card-text">
+                                    <strong>Merchant:</strong> {expense.merchant} <br />
+                                    <strong>Report Date:</strong> {formatDate(expense.date)} <br />
+                                    <strong>Amount:</strong> ${expense.amount} <br />
+                                    <strong>Status:</strong> <span className={`badge ${getStatusBadgeClass(expense.status)}`}>{expense.status}</span>
+                                </p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+
             </div>
         </div>
     );
